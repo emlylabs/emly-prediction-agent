@@ -1,0 +1,203 @@
+# Emly Prediction Agent
+
+An AI-powered predictive analytics platform for non-technical users. Upload data, train machine learning models, and make predictions — all through a simple web interface.
+
+## Features
+
+- **Data Upload** — CSV, Excel, JSON, ZIP files with chunked upload and resume
+- **Data Connectors** — Import from PostgreSQL, MySQL, SQLite, MSSQL, Oracle, SFTP
+- **Data Preparation** — Interactive table editor with 40+ operations and AI copilot
+- **Machine Learning** — 16 algorithms for regression, classification, and clustering
+- **AutoML** — AI-powered model selection using natural language descriptions
+- **Dashboards** — Build interactive charts and visualizations
+- **Model Testing** — Batch predictions, one-by-one testing, and manual form input
+
+## Quick Start (3 Steps)
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL 14+ with pgvector extension
+
+### Step 1: Set Up PostgreSQL
+
+```bash
+# Install PostgreSQL and pgvector (Ubuntu/Debian)
+sudo apt install postgresql postgresql-15-pgvector
+
+# Start PostgreSQL
+sudo systemctl start postgresql
+
+# Create database
+sudo -u postgres psql -c "CREATE USER vectoruser WITH PASSWORD 'vectorpass';"
+sudo -u postgres psql -c "CREATE DATABASE vectordb OWNER vectoruser;"
+sudo -u postgres psql -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+Or use Docker:
+
+```bash
+docker run -d --name emly-postgres \
+  -e POSTGRES_USER=vectoruser \
+  -e POSTGRES_PASSWORD=vectorpass \
+  -e POSTGRES_DB=vectordb \
+  -p 5432:5432 \
+  pgvector/pgvector:pg16
+
+# Enable pgvector extension
+docker exec -it emly-postgres psql -U vectoruser -d vectordb \
+  -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+### Step 2: Install and Run
+
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd predictive-agent
+
+# Create Python virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Build the frontend (one-time)
+cd frontend && npm ci && npm run build && cd ..
+
+# Configure environment
+cp .env.example .env   # Edit .env with your settings (see below)
+
+# Start the application
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Open your browser: **http://localhost:8000**
+
+That's it. The frontend is served automatically by FastAPI — no separate dev server needed.
+
+### Step 3: Configure Environment
+
+Edit `.env` file:
+
+```env
+# Database (required)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=vectordb
+POSTGRES_USER=vectoruser
+POSTGRES_PASSWORD=vectorpass
+
+# LLM (required for AI features: AutoML, Copilot)
+EMLY_SOURCE=openai
+EMLY_MODEL=gpt-4.1-mini
+EMLY_KEY=sk-your-openai-api-key-here
+
+# Embeddings (optional, for document vectorization)
+EMBEDDING_SOURCE=huggingface
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+## Docker Deployment
+
+```bash
+# Build image
+docker build -t emly-prediction-agent .
+
+# Run container
+docker run -d --name emly-app \
+  -p 8080:8080 \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=5432 \
+  -e DB_NAME=vectordb \
+  -e POSTGRES_USER=vectoruser \
+  -e POSTGRES_PASSWORD=vectorpass \
+  -e EMLY_SOURCE=openai \
+  -e EMLY_MODEL=gpt-4.1-mini \
+  -e EMLY_KEY=sk-your-key-here \
+  emly-prediction-agent
+```
+
+Access at **http://localhost:8080**
+
+## Usage Guide
+
+For detailed instructions on uploading data, training models, building dashboards, and more, see:
+
+**[USER_GUIDE.md](USER_GUIDE.md)**
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | FastAPI, Peewee ORM, scikit-learn, mljar-supervised, LangChain |
+| Frontend | React 18, Vite, Tailwind CSS, Radix UI, Recharts |
+| Database | PostgreSQL with pgvector extension |
+| LLM | OpenAI, Anthropic, Google Gemini, Ollama (configurable) |
+
+## Project Structure
+
+```
+predictive-agent/
+├── app/
+│   ├── main.py              # FastAPI entry point
+│   ├── config.py             # Environment configuration
+│   ├── routes/api.py         # REST API endpoints
+│   ├── services/             # Business logic
+│   │   ├── prediction_service.py   # ML training, inference, data prep
+│   │   ├── automl_service.py       # AutoML with mljar
+│   │   ├── llm_service.py          # LLM integration
+│   │   └── vectorization.py        # Document vectorization
+│   ├── connectors/           # Data source connectors
+│   ├── models/               # Database models
+│   └── migrations/           # Schema migrations
+├── frontend/
+│   └── src/
+│       ├── App.jsx           # Main application
+│       └── components/       # UI components
+├── data/
+│   ├── prediction/           # Uploaded datasets and trained models
+│   └── automl/               # AutoML training results
+├── .env                      # Environment configuration
+├── requirements.txt          # Python dependencies
+└── Dockerfile                # Container build
+```
+
+## API Reference
+
+All endpoints are prefixed with `/emly/api/prediction`.
+
+| Category | Method | Endpoint | Description |
+|----------|--------|----------|-------------|
+| Datasets | GET | `/datasets` | List all datasets |
+| Datasets | POST | `/upload/init` | Initialize chunked upload |
+| Datasets | POST | `/upload/chunk/{id}` | Upload file chunk |
+| Datasets | POST | `/upload/complete/{id}` | Finalize upload |
+| Models | GET | `/models` | List trained models |
+| Models | GET | `/algorithms` | List available algorithms |
+| Models | POST | `/train/start` | Start model training |
+| Models | GET | `/train/status/{job_id}` | Check training progress |
+| Models | GET | `/models/{id}/report` | Get model diagnostics |
+| Inference | POST | `/infer` | Run predictions |
+| AutoML | POST | `/automl/detect-problem` | Detect problem type |
+| AutoML | POST | `/automl/start` | Start AutoML training |
+| Dashboards | GET | `/dashboards` | List dashboards |
+| Dashboards | POST | `/dashboards` | Create dashboard |
+| Connectors | GET | `/connectors` | List connectors |
+| Connectors | POST | `/connectors/sql` | Create SQL connector |
+| Health | GET | `/health` | System health metrics |
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Database connection failed | Check PostgreSQL is running and credentials in `.env` are correct |
+| Module not found | Activate virtual environment: `source .venv/bin/activate` |
+| Port in use | Change `APP_PORT` in `.env` or stop other process |
+| pgvector error | Run `CREATE EXTENSION IF NOT EXISTS vector;` in your database |
+| Frontend not loading | Run `cd frontend && npm run build` |
+| AI features not working | Set valid `EMLY_KEY` in `.env` |
+
+# Refer USER_GUIDE FOR MORE DETAILS 
