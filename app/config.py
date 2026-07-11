@@ -14,19 +14,19 @@ def get_int_env(key: str, default: int) -> int:
     return int(value)
 
 # Database Configuration
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = get_int_env("DB_PORT", 5432)
-DB_NAME = os.getenv("DB_NAME", os.getenv("POSTGRES_DB", "vectordb"))
-DB_USER = os.getenv("POSTGRES_USER", "vectoruser")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "vectorpass")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = get_int_env("DB_PORT")
+DB_NAME = os.getenv("DB_NAME", os.getenv("POSTGRES_DB"))
+DB_USER = os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 DB_CONNECTION_STRING = os.getenv(
     "DB_CONNECTION_STRING",
     f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
 # LLM Configuration (EMLY = LLM)
-EMLY_SOURCE = os.getenv("EMLY_SOURCE", "openai")  # openai, google, anthropic, ollama
-EMLY_MODEL = os.getenv("EMLY_MODEL", "gpt-4o-mini")  # LLM chat model
+EMLY_SOURCE = os.getenv("EMLY_SOURCE")  # openai, google, anthropic, ollama
+EMLY_MODEL = os.getenv("EMLY_MODEL")  # LLM chat model
 EMLY_KEY = os.getenv("EMLY_KEY", "")
 
 # LLM URL - Custom base URL (e.g., for OpenAI-compatible APIs, vLLM, LocalAI, etc.)
@@ -34,7 +34,7 @@ EMLY_KEY = os.getenv("EMLY_KEY", "")
 LLM_URL = os.getenv("LLM_URL", None)
 
 # Ollama specific (used when EMLY_SOURCE=ollama)
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")
 
 # Embedding Configuration
 EMBEDDING_SOURCE = os.getenv("EMBEDDING_SOURCE", "huggingface")  # huggingface, openai, google, anthropic, ollama
@@ -51,7 +51,7 @@ CHUNK_OVERLAP = get_int_env("CHUNK_OVERLAP", 200)
 # Search Configuration
 TOP_K = get_int_env("TOP_K", 5)
 WEB_SEARCH_PROVIDER = os.getenv("WEB_SEARCH_PROVIDER", "duckduckgo")  # duckduckgo, serper, auto
-SERPER_API_KEY = os.getenv("SERPER_API_KEY", "ec2bf8a52d27561960fd27ef5599875ae4961b8d")
+SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
 # Application Configuration
 APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
