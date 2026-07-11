@@ -91,10 +91,6 @@ EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 ### Step 3: Install and Run
 
 ```bash
-# Clone the repository
-git clone <your-repository-url>
-cd predictive-agent
-
 # Create Python virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
