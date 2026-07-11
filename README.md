@@ -22,8 +22,11 @@ An AI-powered predictive analytics platform for non-technical users. Upload data
 
 ### Step 1: Set Up PostgreSQL
 
+<details>
+<summary><b>Linux (Ubuntu/Debian)</b></summary>
+
 ```bash
-# Install PostgreSQL and pgvector (Ubuntu/Debian)
+# Install PostgreSQL and pgvector
 sudo apt install postgresql postgresql-15-pgvector
 
 # Start PostgreSQL
@@ -34,8 +37,52 @@ sudo -u postgres psql -c "CREATE USER vectoruser WITH PASSWORD 'vectorpass';"
 sudo -u postgres psql -c "CREATE DATABASE vectordb OWNER vectoruser;"
 sudo -u postgres psql -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
+</details>
 
-Or use Docker:
+<details>
+<summary><b>macOS</b></summary>
+
+```bash
+# Install PostgreSQL (using Homebrew)
+brew install postgresql@16
+brew install pgvector
+
+# Start PostgreSQL
+brew services start postgresql@16
+
+# Create database
+psql postgres -c "CREATE USER vectoruser WITH PASSWORD 'vectorpass';"
+psql postgres -c "CREATE DATABASE vectordb OWNER vectoruser;"
+psql -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+</details>
+
+<details>
+<summary><b>Windows</b></summary>
+
+1. Download and install [PostgreSQL 16](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) from the EDB installer. During installation:
+   - Set the password for the `postgres` superuser (remember this password).
+   - Keep the default port `5432`.
+
+2. Install the pgvector extension:
+   - Open **SQL Shell (psql)** from the Start Menu (or use `psql` from a terminal).
+   - Connect to your database and run:
+     ```sql
+     CREATE EXTENSION IF NOT EXISTS vector;
+     ```
+   - Alternatively, download the [pgvector Windows binaries](https://github.com/pgvector/pgvector#windows) and copy into your PostgreSQL installation.
+
+3. Create the database and user:
+   ```sql
+   CREATE USER vectoruser WITH PASSWORD 'vectorpass';
+   CREATE DATABASE vectordb OWNER vectoruser;
+   \c vectordb
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+</details>
+
+<details>
+<summary><b>Docker (all platforms)</b></summary>
 
 ```bash
 docker run -d --name emly-postgres \
@@ -49,11 +96,26 @@ docker run -d --name emly-postgres \
 docker exec -it emly-postgres psql -U vectoruser -d vectordb \
   -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
+</details>
 
 ### Step 2: Configure Environment
-Clone the repository.
+
+Clone the repository, then copy `.env.sample` to `.env` and edit the `.env` file:
+
+```bash
+git clone https://github.com/emly/emly-prediction-agent.git
 cd emly-prediction-agent
-Copy `.env.sample` to `.env` then edit `.env` file:
+cp .env.sample .env
+```
+
+On **Windows (PowerShell)**:
+```powershell
+git clone https://github.com/emly/emly-prediction-agent.git
+cd emly-prediction-agent
+copy .env.sample .env
+```
+
+Edit `.env` with your settings:
 
 ```env
 # Database (required)
@@ -91,6 +153,9 @@ EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
 ### Step 3: Install and Run
 
+<details>
+<summary><b>Linux / macOS</b></summary>
+
 ```bash
 # Create Python virtual environment
 python3 -m venv .venv
@@ -105,6 +170,50 @@ cd frontend && npm ci && npm run build && cd ..
 # Start the application
 python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
 ```
+</details>
+
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
+
+```powershell
+# Create Python virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Build the frontend (one-time)
+cd frontend; npm ci; npm run build; cd ..
+
+# Start the application
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
+```
+
+> **Note:** If you get a PowerShell execution policy error when activating the virtual environment, run:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+</details>
+
+<details>
+<summary><b>Windows (CMD)</b></summary>
+
+```cmd
+:: Create Python virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate.bat
+
+:: Install Python dependencies
+pip install -r requirements.txt
+
+:: Build the frontend (one-time)
+cd frontend && npm ci && npm run build && cd ..
+
+:: Start the application
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
+```
+</details>
 
 Open your browser: **http://localhost:8000**
 
@@ -207,11 +316,14 @@ All endpoints are prefixed with `/emly/api/prediction`.
 | Problem | Solution |
 |---------|----------|
 | Database connection failed | Check PostgreSQL is running and credentials in `.env` are correct |
-| Module not found | Activate virtual environment: `source .venv/bin/activate` |
+| Module not found | Activate virtual environment: `source .venv/bin/activate` (Linux/macOS) or `.venv\Scripts\Activate.ps1` (Windows) |
 | Port in use | Change `APP_PORT` in `.env` or stop other process |
 | pgvector error | Run `CREATE EXTENSION IF NOT EXISTS vector;` in your database |
 | Frontend not loading | Run `cd frontend && npm run build` |
 | AI features not working | Set valid `EMLY_KEY` in `.env` |
 | LLM_URL not connecting | Ensure `EMLY_KEY` and `EMLY_MODEL` are valid for the endpoint at `LLM_URL`. For local endpoints (Ollama, vLLM) set `EMLY_KEY=not-needed` |
+| Windows: `python3` not recognized | Use `python` instead of `python3` on Windows |
+| Windows: PowerShell script execution error | Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| Windows: `pgvector` extension install | See [pgvector Windows build instructions](https://github.com/pgvector/pgvector#windows) or use Docker |
 
 ### Refer USER_GUIDE FOR MORE DETAILS 
