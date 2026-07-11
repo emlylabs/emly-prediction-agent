@@ -16,7 +16,7 @@ An AI-powered predictive analytics platform for non-technical users. Upload data
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.10
 - Node.js 18+
 - PostgreSQL 14+ with pgvector extension
 
