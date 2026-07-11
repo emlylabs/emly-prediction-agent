@@ -50,7 +50,45 @@ docker exec -it emly-postgres psql -U vectoruser -d vectordb \
   -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
-### Step 2: Install and Run
+### Step 2: Configure Environment
+
+Copy `.env.sample` to `.env` then edit `.env` file:
+
+```env
+# Database (required)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=vectordb
+POSTGRES_USER=vectoruser
+POSTGRES_PASSWORD=vectorpass
+
+# LLM (required for AI features: AutoML, Copilot)
+EMLY_SOURCE=openai
+EMLY_MODEL=gpt-4.1-mini
+EMLY_KEY=sk-your-openai-api-key-here
+
+# Optional: Custom LLM Base URL
+# When LLM_URL is provided, the application connects to that URL using the
+# OpenAI-compatible API format (works with LiteLLM, Ollama, vLLM, LocalAI, etc.).
+# In this mode, EMLY_KEY and EMLY_MODEL must be valid for the target endpoint:
+#   - EMLY_KEY = API key required by that endpoint (use "not-needed" if none required)
+#   - EMLY_MODEL = model name served by that endpoint
+# Example for Ollama running locally:
+#   LLM_URL=http://localhost:11434/v1
+#   EMLY_MODEL=llama3
+#   EMLY_KEY=not-needed
+# Example for LiteLLM proxy:
+#   LLM_URL=http://your-litellm-server:4000
+#   EMLY_MODEL=gpt-4o
+#   EMLY_KEY=sk-your-litellm-key
+LLM_URL=
+
+# Embeddings (optional, for document vectorization)
+EMBEDDING_SOURCE=huggingface
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+### Step 3: Install and Run
 
 ```bash
 # Clone the repository
@@ -67,38 +105,15 @@ pip install -r requirements.txt
 # Build the frontend (one-time)
 cd frontend && npm ci && npm run build && cd ..
 
-# Configure environment
-cp .env.example .env   # Edit .env with your settings (see below)
-
 # Start the application
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
 ```
 
 Open your browser: **http://localhost:8000**
 
 That's it. The frontend is served automatically by FastAPI — no separate dev server needed.
 
-### Step 3: Configure Environment
 
-Edit `.env` file:
-
-```env
-# Database (required)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=vectordb
-POSTGRES_USER=vectoruser
-POSTGRES_PASSWORD=vectorpass
-
-# LLM (required for AI features: AutoML, Copilot)
-EMLY_SOURCE=openai
-EMLY_MODEL=gpt-4.1-mini
-EMLY_KEY=sk-your-openai-api-key-here
-
-# Embeddings (optional, for document vectorization)
-EMBEDDING_SOURCE=huggingface
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-```
 
 ## Docker Deployment
 
@@ -117,6 +132,7 @@ docker run -d --name emly-app \
   -e EMLY_SOURCE=openai \
   -e EMLY_MODEL=gpt-4.1-mini \
   -e EMLY_KEY=sk-your-key-here \
+  -e LLM_URL=http://your-llm-endpoint/v1 \
   emly-prediction-agent
 ```
 
@@ -135,7 +151,7 @@ For detailed instructions on uploading data, training models, building dashboard
 | Backend | FastAPI, Peewee ORM, scikit-learn, mljar-supervised, LangChain |
 | Frontend | React 18, Vite, Tailwind CSS, Radix UI, Recharts |
 | Database | PostgreSQL with pgvector extension |
-| LLM | OpenAI, Anthropic, Google Gemini, Ollama (configurable) |
+| LLM | OpenAI, Anthropic, Google Gemini, Ollama, LiteLLM, vLLM, LocalAI (any OpenAI-compatible endpoint) |
 
 ## Project Structure
 
@@ -199,5 +215,6 @@ All endpoints are prefixed with `/emly/api/prediction`.
 | pgvector error | Run `CREATE EXTENSION IF NOT EXISTS vector;` in your database |
 | Frontend not loading | Run `cd frontend && npm run build` |
 | AI features not working | Set valid `EMLY_KEY` in `.env` |
+| LLM_URL not connecting | Ensure `EMLY_KEY` and `EMLY_MODEL` are valid for the endpoint at `LLM_URL`. For local endpoints (Ollama, vLLM) set `EMLY_KEY=not-needed` |
 
-# Refer USER_GUIDE FOR MORE DETAILS 
+### Refer USER_GUIDE FOR MORE DETAILS 
