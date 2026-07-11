@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Transparent background by default -->
+  <!-- Outer circle (no extra padding; stroke stays inside the 64x64 box) -->
+  <circle cx="32" cy="32" r="31" fill="none" stroke="currentColor" stroke-width="2"/>
+
+  <!-- Bars -->
+  <rect x="18" y="36" width="6" height="12" rx="1" fill="currentColor"/>
+  <rect x="28" y="30" width="6" height="18" rx="1" fill="currentColor"/>
+  <rect x="38" y="24" width="6" height="24" rx="1" fill="currentColor"/>
+
+  <!-- Trend line + arrow -->
+  <path d="M18 34 L31 28 L41 22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M41 22 L38.5 22.5 L40.2 24.2 Z" fill="currentColor"/>
+</svg>
