@@ -51,7 +51,8 @@ docker exec -it emly-postgres psql -U vectoruser -d vectordb \
 ```
 
 ### Step 2: Configure Environment
-
+Clone the repository.
+cd emly-prediction-agent
 Copy `.env.sample` to `.env` then edit `.env` file:
 
 ```env
